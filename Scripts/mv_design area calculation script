@@ -1,0 +1,37 @@
+set total_area 0
+foreach_in_collection a [get_flat_cells -filter "power_domain== PD_RISC_CORE"] {
+    set cell_area [get_attribute -objects [get_cells $a] -name area]
+    set total_area [expr {$total_area + $cell_area}]
+}
+
+#CELL AREA
+puts "total area belongs to PD_RISC_CORE is:$total_area"
+
+#UTILIZATION
+set utilization 0.75
+
+#TOTAL VOLT AREA = CELL AREA/UTI
+set vol_area [expr {$total_area / $utilization}]
+puts "voltage area is required given utilization $utilization is:$vol_area"
+
+#A = H * W
+set ht 172
+set H [expr {$ht/1.672}]
+set rh [expr {ceil($H)} * 1.672]
+puts $rh
+
+set W [expr {$vol_area / $ht}]
+set ww [expr {$W/0.152}]
+set rw [expr {ceil($ww)} * 0.152]
+puts $rw
+
+#A = H * W
+set Xc [expr {$rw-0.016}]
+set Yc [expr {$rh-0.016}]
+
+#{{llx , lly} {urx , ury}}
+set vac [list [list 10.016 10.016] [list $Xc $Yc]]
+
+remove_voltage_areas -all
+
+create_voltage_area -power_domains PD_RISC_CORE -region $vac -guard_band {{5.016 5.016}}
