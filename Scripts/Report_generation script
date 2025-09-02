@@ -1,0 +1,44 @@
+set block [get_attribute [current_block] name]
+
+#check
+if { ! [file exists /home/<username>/<give the path >/reports/$block] } {
+    sh mkdir /home/<username>/<give the path >/reports/$block
+} else {
+    puts "exists"
+}
+
+#max_trans
+report_constraints -max_transition -all_violators -significant_digits 3 -scenario * > /home/<username>/<give the path >/reports/$a/max_tran.rpt
+
+#max_cap
+report_constraints -max_capacitance -all_violators -significant_digits 3 -scenario * > /home/<username>/<give the path >/reports/$block/$a/max_cap.rpt
+
+#timing_report
+report_global_timing > /home/<username>/<give the path >/reports/$block/$a/sv.rpt
+
+#congestion_report
+report_congestion -rerun_global_router > /home/<username>/<give the path >/reports/$block/$a/cong.rpt
+
+#QoR_report
+report_qor > /home/<username>/<give the path >/reports/$block/$a/buff_count.rpt
+
+#utilization_bpo
+remove_utilization_configurations -all
+create_utilization_configuration hi
+report_utilization -config hi >/home/<username>/<give the path >/reports/$block/uti.rpt
+remove_utilization_configurations -all
+
+#Buffer_count
+sizeof_collection [get_flat_cells -filter "ref_name=~*NBUF*"]
+
+#INV_count
+sizeof_collection [get_flat_cells -filter "ref_name=~*INV*"]
+
+#cells added in Clock path during CTS
+sizeof_collection [get_flat_cells *clock_opt_clock*]
+
+#cells added in data_path during CTS
+sizeof_collection [get_flat_cells -filter *clock_opt_opt*]
+
+#total no.of cells added during CTS
+sizeof_collection [get_flat_cells *clock_opt*]
